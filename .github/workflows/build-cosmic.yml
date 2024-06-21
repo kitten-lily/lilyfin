@@ -1,27 +1,19 @@
 ---
-name: build-lilyfin
+name: build-lilyfin-cosmic
 on:
-  pull_request:
-    branches:
-      - main
-  schedule:
-    - cron: '05 10 * * *'  # 10:05am UTC everyday
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - '**/README.md'
   workflow_dispatch:
+  workflow_call:
 
 env:
-  MY_IMAGE_NAME: "${{ github.event.repository.name }}"  # the name of the image produced by this build, matches repo names
-  MY_IMAGE_DESC: "Lily's Bluefin"
+  MY_IMAGE_NAME: "${{ github.event.repository.name }}-cosmic"  # the name of the image produced by this build, matches repo names
+  MY_IMAGE_DESC: "Lily's Bluefin (With COSMIC DE)"
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"  # do not edit
+  SOURCE_IMAGE: "${{ github.repository_owner }}/${{ github.event.repository.name }}:latest"
 
 jobs:
   build_push:
     name: Build and push image
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     permissions:
       contents: read
@@ -32,9 +24,6 @@ jobs:
       # Checkout push-to-registry action GitHub repository
       - name: Checkout Push to Registry action
         uses: actions/checkout@v4
-
-      - name: Maximize build space
-        uses: ublue-os/remove-unwanted-software@v7
 
       - name: Generate tags
         id: generate-tags
@@ -95,10 +84,12 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         with:
           containerfiles: |
-            ./Containerfile
+            ./Containerfile.cosmic
           # Postfix image name with -custom to make it a little more descriptive
           # Syntax: https://docs.github.com/en/actions/learn-github-actions/expressions#format
           image: ${{ env.MY_IMAGE_NAME }}
+          build-args: |
+            SOURCE_IMAGE=${{ env.SOURCE_IMAGE }}
           tags: |
             ${{ steps.generate-tags.outputs.alias_tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -134,8 +125,8 @@ jobs:
           extra-args: |
             --disable-content-trust
 
-      # This section is optional and only needs to be enabled if you plan on distributing
-      # your project for others to consume. You will need to create a public and private key
+      # This section is optional and only needs to be enabled in you plan on distributing
+      # your project to others to consume. You will need to create a public and private key
       # using Cosign and save the private key as a repository secret in Github for this workflow
       # to consume. For more details, review the image signing section of the README.
 
@@ -151,9 +142,3 @@ jobs:
           TAGS: ${{ steps.push.outputs.digest }}
           COSIGN_EXPERIMENTAL: false
           COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
-
-  build_cosmic:
-    name: Build COSMIC image
-    needs: [build_push]
-    uses: ./.github/workflows/build-cosmic.yml
-    secrets: inherit
