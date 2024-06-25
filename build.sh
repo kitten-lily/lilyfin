@@ -9,3 +9,4 @@ RELEASE="$(rpm -E %fedora)"
 . /tmp/install-packages.sh
 . /tmp/install-fonts.sh
 . /tmp/secureblue-features.sh
+. /tmp/cleanup.sh
