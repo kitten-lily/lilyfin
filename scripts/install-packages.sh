@@ -10,4 +10,5 @@ rpm-ostree install \
     firefox \
     headsetcontrol \
     proton-vpn-gnome-desktop \
+    papirus-icon-theme \
     /tmp/ProtonMail-desktop-beta.rpm
