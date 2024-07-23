@@ -3,7 +3,7 @@
 set -ouex pipefail
 
 # Per-network MAC randomization
-wget https://raw.githubusercontent.com/secureblue/secureblue/live/config/files/usr/etc/NetworkManager/conf.d/rand_mac.conf -O /usr/etc/NetworkManager/conf.d/rand_mac.conf
+wget https://raw.githubusercontent.com/secureblue/secureblue/live/files/system/usr/etc/NetworkManager/conf.d/rand_mac.conf -O /usr/etc/NetworkManager/conf.d/rand_mac.conf
 
 # Lock down firewall
 wget https://raw.githubusercontent.com/secureblue/secureblue/live/config/files/usr/etc/firewalld/zones/FedoraWorkstation.xml -O /usr/etc/firewalld/zones/FedoraWorkstation.xml
