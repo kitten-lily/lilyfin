@@ -12,10 +12,11 @@ wget https://proton.me/download/mail/linux/ProtonMail-desktop-beta.rpm -O /tmp/P
 wget $pass_url -O /tmp/ProtonPass.rpm
 
 rpm-ostree install \
-    firefox-langpacks \
-    firefox \
     headsetcontrol \
-    proton-vpn-gnome-desktop \
     papirus-icon-theme \
     /tmp/ProtonMail-desktop-beta.rpm \
     /tmp/ProtonPass.rpm
+
+if [ "$RELEASE" -le "40" ]; then
+    rpm-ostree install proton-vpn-gnome-desktop
+fi

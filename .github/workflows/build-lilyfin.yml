@@ -1,0 +1,26 @@
+name: build-lilyfin
+on:
+  schedule:
+    - cron: "05 10 * * *" # 10:05am UTC everyday
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build image
+    uses: ./.github/workflows/build.yml
+    secrets: inherit
+    with:
+      tag: latest
+      source_tag: latest
+
+  build_cosmic:
+    name: Build COSMIC image
+    needs: [build]
+    uses: ./.github/workflows/build.yml
+    secrets: inherit
+    with:
+      containerfile: "Containerfile.cosmic"
+      image_suffix: "-cosmic"
+      tag: latest
+      source_image: "${{ github.repository_owner }}/${{ github.event.repository.name }}"
+      source_tag: latest

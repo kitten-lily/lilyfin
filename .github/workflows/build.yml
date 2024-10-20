@@ -1,22 +1,38 @@
----
-name: build-lilyfin
 on:
-  pull_request:
-    branches:
-      - main
-  schedule:
-    - cron: '05 10 * * *'  # 10:05am UTC everyday
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - '**/README.md'
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      source_tag:
+        description: "Bluefin source tag"
+        required: true
+        type: string
+      tag:
+        description: "Tag to set on image in addition to auto generated tags"
+        required: true
+        type: string
+      containerfile:
+        description: "Containerfile to use in build"
+        required: false
+        default: "Containerfile"
+        type: string
+      source_image:
+        description: "Source image"
+        required: false
+        default: "bluefin"
+        type: string
+      image_suffix:
+        description: "Optional image name suffix"
+        required: false
+        default: ""
+        type: string
+    outputs:
+      images:
+        description: "An array of images built and pushed to the registry"
+        value: ${{ jobs.check.outputs.images }}
 
 env:
-  MY_IMAGE_NAME: "${{ github.event.repository.name }}"  # the name of the image produced by this build, matches repo names
+  MY_IMAGE_NAME: "${{ github.event.repository.name }}${{ inputs.image_suffix }}" # the name of the image produced by this build, matches repo names
   MY_IMAGE_DESC: "Lily's Bluefin"
-  IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"  # do not edit
+  IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}" # do not edit
 
 jobs:
   build_push:
@@ -56,7 +72,7 @@ jobs:
           done
 
           BUILD_TAGS+=("${TIMESTAMP}")
-          BUILD_TAGS+=("latest")
+          BUILD_TAGS+=("${{ inputs.tag }}")
 
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
               echo "Generated the following commit tags: "
@@ -95,7 +111,7 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         with:
           containerfiles: |
-            ./Containerfile
+            ./${{ inputs.containerfile }}
           # Postfix image name with -custom to make it a little more descriptive
           # Syntax: https://docs.github.com/en/actions/learn-github-actions/expressions#format
           image: ${{ env.MY_IMAGE_NAME }}
@@ -103,6 +119,9 @@ jobs:
             ${{ steps.generate-tags.outputs.alias_tags }}
           labels: ${{ steps.meta.outputs.labels }}
           oci: false
+          build-args: |
+            SOURCE_IMAGE=${{ inputs.source_image }}
+            SOURCE_TAG=${{ inputs.source_tag }}
 
       # Workaround bug where capital letters in your GitHub username make it impossible to push to GHCR.
       # https://github.com/macbre/push-to-ghcr/issues/12
@@ -151,9 +170,9 @@ jobs:
           TAGS: ${{ steps.push.outputs.digest }}
           COSIGN_EXPERIMENTAL: false
           COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
-
-  build_cosmic:
-    name: Build COSMIC image
-    needs: [build_push]
-    uses: ./.github/workflows/build-cosmic.yml
-    secrets: inherit
+#
+#  build_cosmic:
+#    name: Build COSMIC image
+#    needs: [build_push]
+#    uses: ./.github/workflows/build-cosmic.yml
+#    secrets: inherit

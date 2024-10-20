@@ -37,10 +37,6 @@ rm /etc/yum.repos.d/brave.repo -f
 # And then we do the hacky dance!
 mv /var/opt/brave.com /usr/lib/brave # move this over here
 
-# Create a symlink /usr/bin/brave => /opt/brave/brave
-# rm /usr/bin/brave
-# ln -s /opt/brave.com/brave/brave /usr/bin/brave
-
 # Register path symlink
 # We do this via tmpfiles.d so that it is created by the live system.
 cat >/usr/lib/tmpfiles.d/brave.conf <<EOF

@@ -9,6 +9,5 @@ RELEASE="$(rpm -E %fedora)"
 . /tmp/brave.sh
 . /tmp/warp.sh
 . /tmp/install-packages.sh
-. /tmp/install-fonts.sh
 . /tmp/secureblue-features.sh
 . /tmp/cleanup.sh
