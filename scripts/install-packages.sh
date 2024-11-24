@@ -14,6 +14,7 @@ wget $pass_url -O /tmp/ProtonPass.rpm
 rpm-ostree install \
     headsetcontrol \
     papirus-icon-theme \
+    morewaita-icon-theme \
     /tmp/ProtonMail-desktop-beta.rpm \
     /tmp/ProtonPass.rpm
 
